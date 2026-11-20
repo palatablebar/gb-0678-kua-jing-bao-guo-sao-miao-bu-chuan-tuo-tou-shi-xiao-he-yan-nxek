@@ -15,6 +15,13 @@ def evaluate(rows,context):
     output=[]
     for row in rows:
         expected=Decimal(str(row.get("expected","0")));reported=Decimal(str(row.get("reported","0")))
-        output.append({**row,"difference":str(expected-reported),"status":"通过" if expected==reported else "差异"})
-    m.update(expected_total=str(sum((Decimal(str(r.get("expected","0"))) for r in rows),Decimal(0))),reported_total=str(sum((Decimal(str(r.get("reported","0"))) for r in rows),Decimal(0))),differences=sum(r["status"]=="差异" for r in output))
+        item={**row,"difference":str(expected-reported),"status":"通过" if expected==reported else "差异"}
+        # 参考口径（新目的地承诺）只能对比，永不进入赔付；正式赔付仅沿用受理承诺版本
+        if row.get("reference_expected") is not None:
+            item["reference_difference"]=str(Decimal(str(row["reference_expected"]))-expected)
+        output.append(item)
+    official_total=sum((Decimal(str(r.get("expected","0"))) for r in rows),Decimal(0))
+    reference_total=sum((Decimal(str(r["reference_expected"])) for r in rows if r.get("reference_expected") is not None),Decimal(0))
+    m.update(expected_total=str(official_total),reported_total=str(sum((Decimal(str(r.get("reported","0"))) for r in rows),Decimal(0))),differences=sum(r["status"]=="差异" for r in output),
+             reference_total=str(reference_total),reference_claim_blocked=reference_total>official_total)
     return {"rows":output,"quarantine":[],"metrics":m}

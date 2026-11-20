@@ -32,6 +32,9 @@
 | TRAP-12 | DST自然日 | 固定24小时 | 按当地午夜切片 | `app/modules/m5_timeliness/rules.py` | `tests/test_m5.py::test_dst_actual_elapsed_hours` |
 | TRAP-13 | 迟到妥投补传 | 按上传时间赔付 | 发生时间重建 | `app/modules/m4_paths/rules.py` | `tests/test_m4.py::test_late_upload_event_time_decides` |
 | TRAP-23 | 假日端点 | 误算全天 | 当地日半开切段 | `app/modules/m5_timeliness/rules.py` | `tests/test_m5.py::test_holiday_full_day_stops` |
+| TRAP-30 | 更正双承诺 | 按补传新承诺回溯重算 | 受理原承诺为正式口径，新承诺仅参考 | `app/modules/m4_paths/rules.py`、`app/modules/m5_timeliness/rules.py` | `tests/test_commitment.py` |
+| TRAP-31 | 切换失败丢结论 | 半写入覆盖上一版 | 先算后写、失败回退，原始输入留存 | `app/store.py` | `tests/test_commitment.py::test_switch_failure_keeps_previous_complete_conclusion` |
+| TRAP-32 | 重跑新增赔付 | 参考口径并入赔付 | 赔付只取正式expected，参考口径护栏拦截 | `app/modules/m6_compensation/rules.py` | `tests/test_commitment.py::test_reference_claim_that_exceeds_official_is_blocked` |
 
 ## 对账规则
 

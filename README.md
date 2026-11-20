@@ -25,6 +25,8 @@ docker compose exec -T app pytest -q
 
 以事件发生时刻重建路径，补传不改变既有妥投时间；承诺时钟按目的地节假日停表。
 
+**目的地更正双承诺裁决（TRAP-30）**：包裹起运后收到目的地更正、补传扫描混有原/新目的地两套承诺时，正式时效与赔付结算一律采用**受理时的原目的地承诺（original）**——受理即成立运输合同，财务不得追溯变更。补传中的新目的地承诺仅作参考（reference），自下一次扫描起生效，不回溯已受理订单。赔付与证据导出只能沿用正式版本，同一补传重跑不新增赔付；参考口径若算出更高赔付会被拦截（`reference_claim_blocked`）。`POST /api/runs/<id>/commitment` 可一次性原子切换试算口径，切换失败时页面与导出仍读取上一版完整结论，原始扫描、前后承诺与更正依据均留存不删除。
+
 ## 演示
 
 1. 打开首页，核对当次计算、差异和隔离原因。
@@ -34,9 +36,9 @@ docker compose exec -T app pytest -q
 
 ## 输入与输出
 
-输入列见 `docs/DATA-DICTIONARY.md`。项目包含dirty.csv、clean.csv、legacy.csv，统一走实际导入路径。上传限制4MB，拒绝不带时区的时间。业务键按字符串保留，Decimal参与计算，空值不会当零。
+输入列见 `docs/DATA-DICTIONARY.md`。项目包含dirty.csv、clean.csv、legacy.csv、corrected.csv，统一走实际导入路径。上传限制4MB，拒绝不带时区的时间。业务键按字符串保留，Decimal参与计算，空值不会当零。
 
-`POST /api/runs` 接收sample或csv；`GET /api/runs`返回历史批次；`POST /api/runs/<id>/review`需要version与decision；`GET /api/runs/<id>/archive`返回唯一证据导出。
+`POST /api/runs` 接收sample或csv；`GET /api/runs`返回历史批次；`POST /api/runs/<id>/review`需要version与decision；`POST /api/runs/<id>/commitment`接收commitment_policy(original|revised)与可选dry_run，原子切换承诺口径；`GET /api/runs/<id>/archive`返回唯一证据导出。
 
 ## 范围
 

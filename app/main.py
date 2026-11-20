@@ -40,6 +40,12 @@ def create_app():
         p=request.get_json(silent=True) or {}
         if not isinstance(p.get("version"),int): raise DomainError("BAD_VERSION","请提供版本号")
         return store.review(run_id,p["version"],p.get("decision"))
+    @application.post("/api/runs/<run_id>/commitment")
+    def switch_commitment(run_id):
+        p=request.get_json(silent=True) or {}
+        policy=p.get("commitment_policy")
+        if policy not in {"original","revised"}: raise DomainError("BAD_POLICY","承诺口径只能是 original 或 revised")
+        return store.switch_commitment(run_id,policy,bool(p.get("dry_run",False)))
     @application.get("/api/runs/<run_id>/archive")
     def archive(run_id):
         from app.archive import build_archive
